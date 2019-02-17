@@ -9,7 +9,7 @@ class Locker(models.Model):
 	accessible = models.BooleanField(default=False)
 
 	def __str__(self):
-		return self.pk
+		return str(self.pk)
 
 
 class Log(models.Model):
@@ -18,4 +18,4 @@ class Log(models.Model):
 	pics = models.URLField(max_length=512)
 
 	def __str__(self):
-		return self.Locker.pk + ' - ' + self.time
+		return str(self.locker.pk) + ' - ' + str(self.time)
