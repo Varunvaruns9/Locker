@@ -34,7 +34,7 @@ class CameraView(APIView):
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class StatusView(APIView):
+class LockerDetailsView(APIView):
 
 	def get_object(self, locker_id):
 		try:
@@ -45,33 +45,12 @@ class StatusView(APIView):
 	def get(self, request, locker_id, format=None):
 		locker = self.get_object(locker_id)
 		serializer = LockerSerializer(locker)
-		return Response(serializer.data['open_status'])
+		return Response(serializer.data)
 
 	def put(self, request, locker_id, format=None):
 		locker = self.get_object(locker_id)
 		serializer = LockerSerializer(locker, data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-			return Response(serializer.data)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class OpenView(APIView):
-
-	def get_object(self, locker_id):
-		try:
-			return Locker.objects.get(pk=locker_id)
-		except Locker.DoesNotExist:
-			raise Http404
-
-	def get(self, request, locker_id, format=None):
-		locker = self.get_object(locker_id)
-		serializer = LockerSerializer(locker)
-		return Response(serializer.data['accessible'])
-
-	def put(self, request, locker_id, format=None):
-		locker = self.get_object(locker_id)
-		serializer = LockerSerializer(locker, data=request.data)
+		print(serializer)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data)
