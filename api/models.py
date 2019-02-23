@@ -16,7 +16,6 @@ class Log(models.Model):
 	locker = models.ForeignKey('Locker', on_delete=models.CASCADE)
 	open_time = models.DateTimeField(default=timezone.now)
 	close_time = models.DateTimeField(default=timezone.now)
-	pics = models.URLField(max_length=512)
 
 	def __str__(self):
-		return str(self.locker.pk) + ' - ' + str(self.time)
+		return str(self.locker.pk) + ' - ' + str(self.pk)
