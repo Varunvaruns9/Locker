@@ -19,7 +19,7 @@ class AllLockers(APIView):
 		return Response(serializer.data)
 
 
-class CameraView(APIView):
+class LogView(APIView):
 
 	def get(self, request, locker_id, format=None):
 		logs = Log.objects.filter(locker__pk=locker_id)
