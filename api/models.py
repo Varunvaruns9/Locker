@@ -14,8 +14,8 @@ class Locker(models.Model):
 
 class Log(models.Model):
 	locker = models.ForeignKey('Locker', on_delete=models.CASCADE)
-	open_time = models.DateTimeField(default=timezone.now)
-	close_time = models.DateTimeField(default=timezone.now)
+	open_time = models.CharField(max_length=100)
+	close_time = models.CharField(max_length=100)
 
 	def __str__(self):
 		return str(self.locker.pk) + ' - ' + str(self.pk)
