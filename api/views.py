@@ -53,7 +53,7 @@ class LockerDetailsView(APIView):
 		serializer = LockerSerializer(locker)
 		return Response(serializer.data)
 
-	def put(self, request, locker_id, format=None):
+	def patch(self, request, locker_id, format=None):
 		locker = self.get_object(locker_id)
 		serializer = LockerSerializer(locker, data=request.data)
 		print(serializer)
