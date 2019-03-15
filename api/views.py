@@ -1,13 +1,14 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.crypto import get_random_string
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Locker, Log
+from .models import Locker, Log, Pin
 from .serializers import LockerSerializer, LogSerializer
 import dropbox
 
@@ -55,8 +56,13 @@ class LockerDetailsView(APIView):
 
 	def patch(self, request, locker_id, format=None):
 		locker = self.get_object(locker_id)
+		if "accessible" in request.data and request.data["accessible"]:
+			random = get_random_string(length=32)
+			pin = Pin(pin=random, locker=locker)
+			print(random)
+			pin.save()
+			return Response({'status': 'Check your email'})
 		serializer = LockerSerializer(locker, data=request.data)
-		print(serializer)
 		if serializer.is_valid():
 			serializer.save()
 			return Response(serializer.data)
@@ -79,3 +85,16 @@ def login(request):
     token, _ = Token.objects.get_or_create(user=user)
     return Response({'token': token.key},
                     status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+def open(request, token):
+	pin = Pin.objects.get(pin=token)
+	print(pin)
+	if pin is None or token == '':
+		raise Http404
+	locker = pin.locker
+	locker.accessible = True
+	locker.save()
+	html = "Hey, success."
+	return HttpResponse(html)

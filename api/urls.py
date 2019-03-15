@@ -7,4 +7,5 @@ urlpatterns = [
 	path('locker', views.AllLockers.as_view()),
 	path('locker/<int:locker_id>/logs', views.LogView.as_view()),
 	path('locker/<int:locker_id>', views.LockerDetailsView.as_view()),
+	path('locker/<str:token>', views.open),
 ]

@@ -19,3 +19,8 @@ class Log(models.Model):
 
 	def __str__(self):
 		return str(self.locker.pk) + ' - ' + str(self.pk)
+
+
+class Pin(models.Model):
+	pin = models.CharField(max_length=32, null=True, blank=True)
+	locker = models.ForeignKey(Locker, on_delete=models.CASCADE)
