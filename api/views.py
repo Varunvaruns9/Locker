@@ -100,7 +100,7 @@ def login(request):
 def open(request, token):
 	try:
 		pin = Pin.objects.get(pin=token)
-	except self.DoesNotExist:
+	except Pin.DoesNotExist:
 		return HttpResponse("Something is incorrect. Try again.")
 	locker = pin.locker
 	locker.accessible = True
