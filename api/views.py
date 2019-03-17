@@ -98,12 +98,12 @@ def login(request):
 
 @csrf_exempt
 def open(request, token):
-	pin = Pin.objects.get(pin=token)
-	print(pin)
-	if pin is None or token == '':
-		raise Http404
+	try:
+		pin = Pin.objects.get(pin=token)
+	except self.DoesNotExist:
+		return HttpResponse("Something is incorrect. Try again.")
 	locker = pin.locker
 	locker.accessible = True
 	locker.save()
-	html = "Hey, success."
+	html = "Hey, The door can be opened now."
 	return HttpResponse(html)
