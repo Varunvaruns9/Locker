@@ -5,12 +5,16 @@ import datetime
 import subprocess
 import os
 import signal
+import dropbox
+import json
 from multiprocessing import Pool
+
+access_token = 'emeqlLb3TSgAAAAAAAAAIsroEFyj__gpE8g1JP_X9lDvZ0E6f8dOwnyigwPkPQw5'
 
 pool = Pool(processes=1)
 
 io.setmode(io.BOARD)
-io.setup(3, io.OUT, initial=0) # for lock 
+io.setup(11, io.OUT, initial=1) # for lock 
 io.setup(5, io.IN)  # for taking input thar door is closed or open using magnet
 io.setup(7, io.IN)  # signal from the mobile to open the door
 #io.setup(8, io.OUT, initial=0)
@@ -43,9 +47,11 @@ while(True):
 	if(token_request["accessible"]):
 		print('opening the lock')
 		flag=False
+		foo = False
 		io.output(10, 1)
-		io.output(3, 1)
-		for k in range(25):
+		io.output(11, 0)
+		num = 25
+		for k in range(num):
 			prestat=status
 			status = io.input(5)
 			stat=status
@@ -54,6 +60,7 @@ while(True):
 					open_time=str(datetime.datetime.now())
 					file_start = subprocess.Popen(["raspivid -o vid1.h264 -t 600000 -w 480 -h 360 -fps 15"], shell=True, stdout=subprocess.PIPE, preexec_fn=os.setsid)
 					print('Video start')
+					foo = True
 				print('door is opened')
 				data = {'open_status' : True}
 				token_request = requests.patch(url=url, data=data, headers=token)
@@ -68,15 +75,27 @@ while(True):
 					#pool.apply_async(lol, (url1, obj, token, {'file':vid})) 
 					data = {'open_status' : False}
 					token_request = requests.patch(url=url, data=data, headers=token)
-					db = requests.post(url=url1, data=obj, headers=token, files={'file':vid})
+					io.output(10, 0)
+					io.output(11, 1)
+					db = requests.post(url=url1, data=obj, headers=token)
+					li = requests.get(url=url1, headers=token)
+					dbx = dropbox.Dropbox(access_token)
+					path = '/locker1/' + str(len(li)+1) + '.mp4'
+					dbx.files_upload(vid.read(), path)
 					os.system("rm -rf video3.mp4 vid1.h264")
 					flag=True
+					foo = False
+					#io.output(10, 0)
+					#io.output(11, 1)
 					break
 				print('door is closed')
 			#print(token_request.text)
 			time.sleep(1)
+			if status == 1:
+				num = num + 1
 		if not flag:
-			for j in range(5):
+			num = 5
+			for j in range(num):
 				status = io.input(5)
 				if status == 1:
 					if prestat==0:
@@ -94,17 +113,27 @@ while(True):
 						#pool.apply_async(lol, (url1, obj, token, {'file':vid}))
 						data = {'open_status' : False}
 						token_request = requests.patch(url=url, data=data, headers=token)
-						db = requests.post(url=url1, data=obj, headers=token, files={'file':vid})
+						io.output(10, 0)
+						io.output(11, 1)
+						db = requests.post(url=url1, data=obj, headers=token)
+						li = requests.get(url=url1, headers=token)
+						dbx = dropbox.Dropbox(access_token)
+						path = '/locker1/' + str(len(li)+1) + '.mp4'
+						dbx.files_upload(vid.read(), path)
 						os.system("rm -rf video3.mp4 vid1.h264")
+						#io.output(10, 0)
+						#io.output(11, 1)
 						break
 					print('door is closed')
+				if status == 1:
+					num = num + 1
 				io.output(10, 0)
 				time.sleep(0.5)
 				io.output(10, 1)
 				time.sleep(0.5)
 		print('closing the lock')
 		io.output(10, 0)
-		io.output(3, 0)
+		io.output(11, 1)
 		data = {'accessible' : False}
 		token_request = requests.patch(url=url, data=data, headers=token)
 	i=i-1

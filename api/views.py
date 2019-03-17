@@ -2,6 +2,8 @@ from django.http import Http404, HttpResponse
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.crypto import get_random_string
+from django.core.mail import send_mail
+from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -34,9 +36,9 @@ class LogView(APIView):
 		serializer = LogSerializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
-			dbx = dropbox.Dropbox(access_token)
-			path = '/locker' + str(locker_id) + '/' + str(serializer.data['id']) + '.mp4'
-			dbx.files_upload(request.FILES['file'].read(), path)
+			# dbx = dropbox.Dropbox(access_token)
+			# path = '/locker' + str(locker_id) + '/' + str(serializer.data['id']) + '.mp4'
+			# dbx.files_upload(request.FILES['file'].read(), path)
 			return Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -61,6 +63,13 @@ class LockerDetailsView(APIView):
 			pin = Pin(pin=random, locker=locker)
 			print(random)
 			pin.save()
+			send_mail(
+					    'Locker %d access verification.' % locker_id,
+					    'Please use this url to verify the locker access request for the locker: http://lockerapi.herokuapp.com/api/locker/' + random,
+					    settings.EMAIL_HOST_USER,
+					    [request.user.email, ],
+					    fail_silently=False,
+					)
 			return Response({'status': 'Check your email'})
 		serializer = LockerSerializer(locker, data=request.data)
 		if serializer.is_valid():
